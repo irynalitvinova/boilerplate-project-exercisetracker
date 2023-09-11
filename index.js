@@ -50,6 +50,12 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+// GET request to /api/users 
+app.get('/api/users', async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+});
+
 // POST /api/users username
 app.post('/api/users', async (req, res) => {
   //  res.send(req.body.username);
@@ -63,6 +69,7 @@ app.post('/api/users', async (req, res) => {
   });
  res.json(user);
 });
+
 
 
 const listener = app.listen(process.env.PORT || 3000, () => {
