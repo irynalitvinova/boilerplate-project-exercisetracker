@@ -37,11 +37,21 @@ const userSchema = mongoose.Schema(
       type: String,
       unique: true,
     },
-  }, 
+  },
   { versionKey: false }
 );
 
 const User = mongoose.model('User', userSchema);
+
+const exerciseSchema = mongoose.Schema({
+  username: String,
+  description: String,
+  duration: Number,
+  date: String,
+  userId: String
+});
+
+const Exercise = mongoose.model('Exercise', exerciseSchema);
 
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
@@ -61,16 +71,36 @@ app.post('/api/users', async (req, res) => {
   //  res.send(req.body.username);
   const username = req.body.username;
   const foundUser = await User.findOne({ username });
-  if(foundUser) {
+  if (foundUser) {
     res.json(foundUser)
   }
   const user = await User.create({
     username,
   });
- res.json(user);
+  res.json(user);
 });
 
+// POST to /api/users/:_id/exercises
+app.post('/api/users/:_id/exercises', (req, res) => {
+  // const id = req.params._id;
+  const { _id, description, duration, date } = req.body;
+  const userId = req.body[':_id'];
+  res.send({
+    _id: userId,
+    description,
+    duration,
+    date,
+  });
+});
 
+/* {
+  username: "fcc_test",
+  description: "test",
+  duration: 60,
+  date: "Mon Jan 01 1990",
+  _id: "5fb5853f734231456ccb3b05"
+}
+*/
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
