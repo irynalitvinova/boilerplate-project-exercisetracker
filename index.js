@@ -83,13 +83,18 @@ app.post('/api/users', async (req, res) => {
 // POST to /api/users/:_id/exercises
 app.post('/api/users/:_id/exercises', (req, res) => {
   // const id = req.params._id;
-  const { _id, description, duration, date } = req.body;
+  let { _id, description, duration, date } = req.body;
   const userId = req.body[':_id'];
+  if (!date) {
+    date = new Date();
+  } else {
+    date = new Date(date)
+  }
   res.send({
     _id: userId,
     description,
     duration,
-    date,
+    date: date.toDateString(),
   });
 });
 
