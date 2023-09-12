@@ -2,13 +2,18 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config();
+// bodyParser is for POST request
+let bodyParser = require('body-parser');
 
-// const mongoose = require('mongoose');
-// mongoose.connect(process.env.MONGO_URL, () => {
-//   console.log("Connect to DB Succesefully");
-// });
-
-
+const mongoose = require('mongoose');
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true, useUnifiedTopology: true
+},
+  function () {
+    console.log("Connect to DB Succesefully");
+  }
+);
+const Schema = mongoose.Schema;
 
 // using localhost :
 /*
@@ -21,15 +26,14 @@ mongoose.connect("mongodb://localhost:3000/posts", {
   }
 );
 */
+// User Schema
+const userSchema = new Schema ({
+  username: {type: String, required: true}
+});
+let User = mongoose.model('user', userSchema)
+/*
+const Schema = mongoose.Schema;
 
-const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true, useUnifiedTopology: true
-},
-  function () {
-    console.log("Connect to DB Succesefully");
-  }
-);
 
 const userSchema = mongoose.Schema(
   {
@@ -42,7 +46,10 @@ const userSchema = mongoose.Schema(
 );
 
 const User = mongoose.model('User', userSchema);
+*/
 
+// Exercise Schema
+/*
 const exerciseSchema = mongoose.Schema({
   username: String,
   description: String,
@@ -50,54 +57,136 @@ const exerciseSchema = mongoose.Schema({
   date: String,
   userId: String
 });
-
 const Exercise = mongoose.model('Exercise', exerciseSchema);
+*/
 
-app.use(cors())
-app.use(express.urlencoded({ extended: true }))
+// const exerciseSchema = new Schema({
+//   userId: String,
+//   username: String,
+//   description: String,
+//   duration: Number,
+//   date: { type: Date, default: new Date() },
+// });
+
+// const exerciseModel = mongoose.model('Exercise', exerciseSchema);
+
+
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use('/', bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
-// GET request to /api/users 
-app.get('/api/users', async (req, res) => {
-  const users = await User.find();
-  res.send(users);
+app.post('/api/users', (req, res) => {
+  // res.json(req.body);
+  let username = req.body.username;
+  let newUser = User({username: username});
+  newUser.save();
+  res.json(newUser);
 });
+//app.post('/api/users', async (req, res) => {
+  //  res.send(req.body.username);
+//   const username = req.body.username;
+//    const foundUser = await User.findOne({ username });
+//    if (foundUser) {
+//      res.json(foundUser)
+//    }
+//    const user = await User.create({
+//     username,
+//    });
+
+//    res.json(user);
+//  });
+
+// GET request to /api/users 
+// app.get('/api/users', async (req, res) => {
+//   const users = await User.find();
+//   res.send(users);
+// });
 
 // POST /api/users username
-app.post('/api/users', async (req, res) => {
+//app.post('/api/users', async (req, res) => {
   //  res.send(req.body.username);
-  const username = req.body.username;
-  const foundUser = await User.findOne({ username });
-  if (foundUser) {
-    res.json(foundUser)
-  }
-  const user = await User.create({
-    username,
-  });
-  res.json(user);
-});
+//   const username = req.body.username;
+//   const foundUser = await User.findOne({ username });
+//   if (foundUser) {
+//     res.json(foundUser)
+//   }
+//   const user = await User.create({
+//     username,
+//   });
+
+//   res.json(user);
+// });
+
+// app.get('/api/users/:_id/logs', async (req, res) => {
+//   const userId = await req.params._id;
+//   res.send(userId);
+// });
 
 // POST to /api/users/:_id/exercises
-app.post('/api/users/:_id/exercises', (req, res) => {
-  // const id = req.params._id;
+// app.post('/api/users/:_id/exercises', (req, res) => {
+//   let userId = req.params._id;
+//   let exerciseObject = {
+//     userId: userId,
+//     description: req.body.description,
+//     duration: req.body.duration,
+
+//   }
+//   if (req.body.date != '') {
+//     exerciseObject.date = req.body.date
+//   }
+//   let newExercise = new exerciseModel(exerciseObject);
+//   User.findById(userId, (err, userFound) => {
+//     if (err) {
+//       console.log(err);
+//     }
+//     newExercise.save();
+//     res.json({
+//       _id: userFound._id,
+//       username: userFound.username,
+//       description: newExercise.description,
+//       duration: newExercise.duration,
+//       date: newExercise.date.toDateString(),
+//     })
+//   })
+// });
+/*
+app.post('/api/users/:_id/exercises', async (req, res) => {
+
   let { _id, description, duration, date } = req.body;
   const userId = req.body[':_id'];
+  const foundUser = await User.findById(userId);
+  if (!foundUser) {
+    res.json({ message: "No user for that id" })
+  }
+
   if (!date) {
     date = new Date();
   } else {
     date = new Date(date)
   }
+
+  const exercise = await Exercise.create({
+    username: foundUser.username,
+    description,
+    duration,
+    date,
+    userId,
+  });
+
   res.send({
-    _id: userId,
+    username: foundUser.username,
     description,
     duration,
     date: date.toDateString(),
+    _id: userId,
   });
-});
 
+});
+*/
 /* {
   username: "fcc_test",
   description: "test",
