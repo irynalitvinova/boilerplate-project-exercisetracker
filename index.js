@@ -148,6 +148,32 @@ app.post('/api/users/:_id/exercises', (req, res) => {
     });
   });
 });
+
+// GET request to /api/users/:_id/logs
+app.get('/api/users/:_id/logs', (req, res) => {
+  let userId = req.params._id;
+  let responseObject = {};
+  User.findById(userId, (err, userFound) => {
+    if (err) {
+      console.log(err);
+    }
+    let username = userFound.username;
+    let userId = userFound._id;
+
+    responseObject = {
+      _id: userId,
+      username: username
+    }
+    Exercise.find({ userId: userId }, (err, exercises) => {
+      if (err) {
+        console.log(err);
+      }
+      responseObject.log = exercises;
+      responseObject.count = exercises.length;
+      res.json(responseObject);
+    });
+  });
+});
 /*
 app.post('/api/users/:_id/exercises', async (req, res) => {
 
