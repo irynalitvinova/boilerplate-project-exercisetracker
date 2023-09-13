@@ -62,7 +62,6 @@ const exerciseSchema = new Schema({
   duration: { type: Number, required: true },
   date: { type: Date, default: new Date() },
 });
-
 const Exercise = mongoose.model('Exercise', exerciseSchema);
 
 app.use(cors());
@@ -131,9 +130,7 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   if (req.body.date != '') {
     exerciseObject.date = req.body.date;
   }
-
   let newExercise = new Exercise(exerciseObject);
-
   User.findById(userId, (err, userFound) => {
     if (err) {
       console.log(err);
@@ -153,6 +150,26 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 app.get('/api/users/:_id/logs', (req, res) => {
   let userId = req.params._id;
   let responseObject = {};
+  // Add from, to and limit parameters to a GET /api/users/:_id/logs request
+  let limitParameter = req.query.limit;
+  let toParameter = req.query.to;
+  let fromParameter = req.query.from;
+  limitParameter = limitParameter ? parseInt(limitParameter) : limitParameter;
+  let queryObject = { userId: userId };
+  // MongoDB https://www.mongodb.com/docs/manual/reference/operator/query/gte/; https://www.mongodb.com/docs/v7.0/reference/operator/query/lte/
+  // $gte selects the documents where the value of the field is greater than or equal to (i.e. >=) a specified value (e.g. value.)
+  // MongoDB https://www.mongodb.com/docs/v7.0/reference/operator/query/lte/
+  // $lte selects the documents where the value of the field is less than or equal to (i.e. <=) the specified value.
+  if (fromParameter || toParameter) {
+    queryObject.date = {};
+    if (fromParameter) {
+      queryObject.date['$gte'] = fromParameter;
+    }
+    if (toParameter) {
+      queryObject.date['$lte'] = toParameter;
+    }
+  }
+
   User.findById(userId, (err, userFound) => {
     if (err) {
       console.log(err);
@@ -164,7 +181,7 @@ app.get('/api/users/:_id/logs', (req, res) => {
       _id: userId,
       username: username
     }
-    Exercise.find({ userId: userId }, (err, exercises) => {
+    Exercise.find(queryObject).limit(limitParameter).exec((err, exercises) => {
       if (err) {
         console.log(err);
       }
@@ -176,7 +193,7 @@ app.get('/api/users/:_id/logs', (req, res) => {
           date: x.date.toDateString()
         }
       });
-      //
+      
       responseObject.log = exercises;
       responseObject.count = exercises.length;
       res.json(responseObject);
