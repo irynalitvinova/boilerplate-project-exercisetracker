@@ -73,6 +73,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+// POST /api/users
 app.post('/api/users', (req, res) => {
   // res.json(req.body);
   let username = req.body.username;
@@ -90,7 +91,6 @@ app.post('/api/users', (req, res) => {
 //    const user = await User.create({
 //     username,
 //    });
-
 //    res.json(user);
 //  });
 
@@ -168,6 +168,15 @@ app.get('/api/users/:_id/logs', (req, res) => {
       if (err) {
         console.log(err);
       }
+      // The date property of any object in the log array that is returned from GET /api/users/:_id/logs should be a string.
+      exercises = exercises.map((x) => {
+        return {
+          description: x.description,
+          duration: x.duration,
+          date: x.date.toDateString()
+        }
+      });
+      //
       responseObject.log = exercises;
       responseObject.count = exercises.length;
       res.json(responseObject);
@@ -176,20 +185,17 @@ app.get('/api/users/:_id/logs', (req, res) => {
 });
 /*
 app.post('/api/users/:_id/exercises', async (req, res) => {
-
   let { _id, description, duration, date } = req.body;
   const userId = req.body[':_id'];
   const foundUser = await User.findById(userId);
   if (!foundUser) {
     res.json({ message: "No user for that id" })
   }
-
   if (!date) {
     date = new Date();
   } else {
     date = new Date(date)
   }
-
   const exercise = await Exercise.create({
     username: foundUser.username,
     description,
@@ -197,7 +203,6 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
     date,
     userId,
   });
-
   res.send({
     username: foundUser.username,
     description,
@@ -205,16 +210,7 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
     date: date.toDateString(),
     _id: userId,
   });
-
 });
-*/
-/* {
-  username: "fcc_test",
-  description: "test",
-  duration: 60,
-  date: "Mon Jan 01 1990",
-  _id: "5fb5853f734231456ccb3b05"
-}
 */
 
 const listener = app.listen(process.env.PORT || 3000, () => {
