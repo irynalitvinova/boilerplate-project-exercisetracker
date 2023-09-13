@@ -27,14 +27,11 @@ mongoose.connect("mongodb://localhost:3000/posts", {
 );
 */
 // User Schema
-const userSchema = new Schema ({
-  username: {type: String, required: true}
+const userSchema = new Schema({
+  username: { type: String, required: true }
 });
 let User = mongoose.model('user', userSchema)
 /*
-const Schema = mongoose.Schema;
-
-
 const userSchema = mongoose.Schema(
   {
     username: {
@@ -44,7 +41,6 @@ const userSchema = mongoose.Schema(
   },
   { versionKey: false }
 );
-
 const User = mongoose.model('User', userSchema);
 */
 
@@ -60,16 +56,14 @@ const exerciseSchema = mongoose.Schema({
 const Exercise = mongoose.model('Exercise', exerciseSchema);
 */
 
-// const exerciseSchema = new Schema({
-//   userId: String,
-//   username: String,
-//   description: String,
-//   duration: Number,
-//   date: { type: Date, default: new Date() },
-// });
+const exerciseSchema = new Schema({
+  userId: { type: String, required: true },
+  description: { type: String, required: true },
+  duration: { type: Number, required: true },
+  date: { type: Date, default: new Date() },
+});
 
-// const exerciseModel = mongoose.model('Exercise', exerciseSchema);
-
+const Exercise = mongoose.model('Exercise', exerciseSchema);
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -82,12 +76,12 @@ app.get('/', (req, res) => {
 app.post('/api/users', (req, res) => {
   // res.json(req.body);
   let username = req.body.username;
-  let newUser = User({username: username});
+  let newUser = User({ username: username });
   newUser.save();
   res.json(newUser);
 });
 //app.post('/api/users', async (req, res) => {
-  //  res.send(req.body.username);
+//  res.send(req.body.username);
 //   const username = req.body.username;
 //    const foundUser = await User.findOne({ username });
 //    if (foundUser) {
@@ -101,14 +95,14 @@ app.post('/api/users', (req, res) => {
 //  });
 
 // GET request to /api/users 
-// app.get('/api/users', async (req, res) => {
-//   const users = await User.find();
-//   res.send(users);
-// });
+app.get('/api/users', async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+});
 
 // POST /api/users username
 //app.post('/api/users', async (req, res) => {
-  //  res.send(req.body.username);
+//  res.send(req.body.username);
 //   const username = req.body.username;
 //   const foundUser = await User.findOne({ username });
 //   if (foundUser) {
@@ -127,32 +121,33 @@ app.post('/api/users', (req, res) => {
 // });
 
 // POST to /api/users/:_id/exercises
-// app.post('/api/users/:_id/exercises', (req, res) => {
-//   let userId = req.params._id;
-//   let exerciseObject = {
-//     userId: userId,
-//     description: req.body.description,
-//     duration: req.body.duration,
+app.post('/api/users/:_id/exercises', (req, res) => {
+  let userId = req.params._id;
+  let exerciseObject = {
+    userId: userId,
+    description: req.body.description,
+    duration: req.body.duration
+  }
+  if (req.body.date != '') {
+    exerciseObject.date = req.body.date;
+  }
 
-//   }
-//   if (req.body.date != '') {
-//     exerciseObject.date = req.body.date
-//   }
-//   let newExercise = new exerciseModel(exerciseObject);
-//   User.findById(userId, (err, userFound) => {
-//     if (err) {
-//       console.log(err);
-//     }
-//     newExercise.save();
-//     res.json({
-//       _id: userFound._id,
-//       username: userFound.username,
-//       description: newExercise.description,
-//       duration: newExercise.duration,
-//       date: newExercise.date.toDateString(),
-//     })
-//   })
-// });
+  let newExercise = new Exercise(exerciseObject);
+
+  User.findById(userId, (err, userFound) => {
+    if (err) {
+      console.log(err);
+    }
+    newExercise.save();
+    res.json({
+      _id: userFound._id,
+      username: userFound.username,
+      description: newExercise.description,
+      duration: newExercise.duration,
+      date: newExercise.date.toDateString(),
+    });
+  });
+});
 /*
 app.post('/api/users/:_id/exercises', async (req, res) => {
 
